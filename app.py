@@ -2,75 +2,174 @@ import streamlit as st
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 # --- Page Config ---
-st.set_page_config(page_title="BEU BULK RESULT FINDER", page_icon="🎓")
+st.set_page_config(page_title="BEU BULK RESULT FINDER", page_icon="🎓", layout="centered")
 
-# --- Custom CSS (Blue & Black Theme) ---
+# --- Custom CSS (Advanced Blue & Black Professional Theme) ---
 st.markdown("""
     <style>
-    .stApp { background-color: #0e1117; color: white; }
-    .stButton>button { background-color: #007bff; color: white; border-radius: 8px; font-weight: bold; width: 100%; height: 3.5em; border: none; }
-    .stTextInput>div>div>input { background-color: #161b22; color: white; border: 1px solid #007bff; }
-    .footer { text-align: center; margin-top: 50px; color: #8b949e; border-top: 1px solid #30363d; padding-top: 20px; font-size: 14px; }
-    a { color: #58a6ff !important; text-decoration: none; font-weight: bold; }
-    .result-card { border: 1px solid #30363d; padding: 15px; border-radius: 10px; margin-bottom: 12px; background: #161b22; display: flex; justify-content: space-between; align-items: center; }
-    .header-container { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
-    .header-logo { width: 80px; height: 80px; border-radius: 10px; }
+    /* Main Background */
+    .stApp { 
+        background-color: #0b0e14; 
+        color: #e6edf3; 
+    }
+    
+    /* Header Container Styling */
+    .header-box {
+        text-align: center;
+        padding: 30px 10px;
+        background: linear-gradient(180deg, #161b22 0%, #0b0e14 100%);
+        border-bottom: 2px solid #007bff;
+        margin-bottom: 40px;
+        border-radius: 0 0 20px 20px;
+    }
+    .uni-name {
+        color: #ffffff;
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    .sub-title {
+        color: #007bff;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+    
+    /* Input Fields */
+    .stTextInput>div>div>input, .stNumberInput>div>div>input {
+        background-color: #161b22 !important;
+        color: white !important;
+        border: 1px solid #30363d !important;
+        border-radius: 12px !important;
+        padding: 12px !important;
+    }
+    
+    /* Big Action Button */
+    .stButton>button {
+        background: linear-gradient(90deg, #007bff, #00c6ff);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 20px;
+        width: 100%;
+        transition: 0.4s;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+    }
+    .stButton>button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 6px 25px rgba(0, 123, 255, 0.6);
+        color: white;
+    }
+
+    /* Result Card Styling */
+    .result-card {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-left: 6px solid #007bff;
+        padding: 18px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: 0.3s;
+    }
+    .result-card:hover {
+        border-color: #007bff;
+        background: #1c2128;
+    }
+
+    /* Download Link Button */
+    .btn-link {
+        background-color: #238636;
+        color: white !important;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none !important;
+        display: inline-block;
+    }
+    .btn-link:hover {
+        background-color: #2ea043;
+    }
+    
+    /* Footer Styling */
+    .footer {
+        text-align: center;
+        margin-top: 80px;
+        padding: 40px 20px;
+        background: #0d1117;
+        border-top: 1px solid #30363d;
+        color: #8b949e;
+        font-size: 14px;
+        line-height: 1.6;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# --- Header with Logo & New Title ---
-# Note: Maine BEU ka ek standard logo link dala hai, aap ise kisi bhi image URL se badal sakte hain
-logo_url = "https://beu-bih.ac.in/images/logo.png" 
+# --- Logo & Heading ---
+col_l, col_r = st.columns([1, 4])
+with col_l:
+    # Yahan aap apna logo.png upload karke uska naam likh sakte hain
+    # Filhal main placeholder image use kar raha hoon
+    st.image("https://beu-bih.ac.in/images/logo.png", width=100)
 
-st.markdown(f"""
-    <div class="header-container">
-        <img src="{logo_url}" class="header-logo" alt="BEU Logo">
-        <h1>BEU BULK RESULT FINDER</h1>
-    </div>
+with col_r:
+    st.markdown("""
+        <div style='padding-top: 10px;'>
+            <div style='color: #ffffff; font-size: 28px; font-weight: 800;'>Bihar Engineering University, Patna</div>
+            <div style='color: #007bff; font-size: 18px; font-weight: 600;'>BEU Bulk Result Finder</div>
+        </div>
     """, unsafe_allow_html=True)
 
-# --- Inputs ---
-st.info("💡 Paste the result URL of any student from the BEU site below.")
-sample_url = st.text_input("1. Paste Sample Result URL", 
-                           placeholder="https://beu-bih.ac.in/result-three?name=...")
+st.markdown("---")
 
-col1, col2 = st.columns(2)
-with col1:
-    start_reg = st.number_input("Start Reg. No", value=23102125001, format="%d")
-with col2:
-    end_reg = st.number_input("End Reg. No", value=23102125010, format="%d")
+# --- Form Section ---
+st.markdown("### 📝 Enter Details")
+url_input = st.text_input("🔗 Paste any student's Result URL from BEU Website", 
+                          placeholder="Example: https://beu-bih.ac.in/result-three?name=...")
 
-# --- Logic ---
-if st.button("Generate Bulk Result Links"):
-    if not sample_url or "regNo=" not in sample_url:
-        st.error("Please paste a correct BEU Result URL containing 'regNo'.")
+c1, c2 = st.columns(2)
+with c1:
+    start_num = st.number_input("Start Registration No.", value=23102125001, format="%d")
+with c2:
+    end_num = st.number_input("End Registration No.", value=23102125010, format="%d")
+
+# --- Execution ---
+if st.button("🚀 GENERATE ALL LINKS"):
+    if not url_input or "regNo=" not in url_input:
+        st.error("⚠️ Please enter a valid URL that contains 'regNo'.")
     else:
         try:
-            parsed_url = urlparse(sample_url)
-            query_params = parse_qs(parsed_url.query)
+            parsed = urlparse(url_input)
+            params = parse_qs(parsed.query)
             
-            st.success(f"Successfully generated links for range {start_reg} to {end_reg}")
+            st.markdown("### 📋 Result Links Generated")
+            st.info("Click 'Open Result' and press **Ctrl + P** to save as PDF.")
             
-            st.markdown("### 📋 Result List:")
-            st.write("Click the links below to view/print results. (Use Ctrl+P to save as PDF)")
-
-            for reg in range(int(start_reg), int(end_reg) + 1):
-                query_params['regNo'] = [str(reg)]
-                new_query = urlencode(query_params, doseq=True)
-                final_link = urlunparse(parsed_url._replace(query=new_query))
+            for r in range(int(start_num), int(end_num) + 1):
+                params['regNo'] = [str(r)]
+                new_q = urlencode(params, doseq=True)
+                final_url = urlunparse(parsed._replace(query=new_q))
                 
                 st.markdown(f"""
                 <div class="result-card">
-                    <span>🎓 Reg. No: <b>{reg}</b></span>
-                    <a href="{final_link}" target="_blank">📄 View & Download PDF</a>
+                    <span style="font-size:16px;">🎓 Reg No: <b>{r}</b></span>
+                    <a href="{final_url}" target="_blank" class="btn-link">📄 Open Result</a>
                 </div>
                 """, unsafe_allow_html=True)
-
+                
+            st.balloons()
+            
         except Exception as e:
-            st.error(f"Error generating links: {e}")
+            st.error(f"Error: {e}")
 
 # --- Footer ---
-st.markdown("---")
 st.markdown(f"""
     <div class="footer">
         <p>This Bulk Result Downloader is designed and developed by <b>Krishna Raj</b>,<br>
