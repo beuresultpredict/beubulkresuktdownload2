@@ -2,21 +2,32 @@ import streamlit as st
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 # --- Page Config ---
-st.set_page_config(page_title="BEU Bulk Result Downloader", page_icon="🎓")
+st.set_page_config(page_title="BEU BULK RESULT FINDER", page_icon="🎓")
 
 # --- Custom CSS (Blue & Black Theme) ---
 st.markdown("""
     <style>
     .stApp { background-color: #0e1117; color: white; }
-    .stButton>button { background-color: #007bff; color: white; border-radius: 8px; font-weight: bold; width: 100%; height: 3.5em; }
+    .stButton>button { background-color: #007bff; color: white; border-radius: 8px; font-weight: bold; width: 100%; height: 3.5em; border: none; }
     .stTextInput>div>div>input { background-color: #161b22; color: white; border: 1px solid #007bff; }
     .footer { text-align: center; margin-top: 50px; color: #8b949e; border-top: 1px solid #30363d; padding-top: 20px; font-size: 14px; }
     a { color: #58a6ff !important; text-decoration: none; font-weight: bold; }
     .result-card { border: 1px solid #30363d; padding: 15px; border-radius: 10px; margin-bottom: 12px; background: #161b22; display: flex; justify-content: space-between; align-items: center; }
+    .header-container { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+    .header-logo { width: 80px; height: 80px; border-radius: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("🟦 BEU Bulk Result Downloader")
+# --- Header with Logo & New Title ---
+# Note: Maine BEU ka ek standard logo link dala hai, aap ise kisi bhi image URL se badal sakte hain
+logo_url = "https://beu-bih.ac.in/images/logo.png" 
+
+st.markdown(f"""
+    <div class="header-container">
+        <img src="{logo_url}" class="header-logo" alt="BEU Logo">
+        <h1>BEU BULK RESULT FINDER</h1>
+    </div>
+    """, unsafe_allow_html=True)
 
 # --- Inputs ---
 st.info("💡 Paste the result URL of any student from the BEU site below.")
@@ -35,7 +46,6 @@ if st.button("Generate Bulk Result Links"):
         st.error("Please paste a correct BEU Result URL containing 'regNo'.")
     else:
         try:
-            # URL Parsing
             parsed_url = urlparse(sample_url)
             query_params = parse_qs(parsed_url.query)
             
@@ -45,12 +55,10 @@ if st.button("Generate Bulk Result Links"):
             st.write("Click the links below to view/print results. (Use Ctrl+P to save as PDF)")
 
             for reg in range(int(start_reg), int(end_reg) + 1):
-                # Update regNo dynamically
                 query_params['regNo'] = [str(reg)]
                 new_query = urlencode(query_params, doseq=True)
                 final_link = urlunparse(parsed_url._replace(query=new_query))
                 
-                # Show cards for each student
                 st.markdown(f"""
                 <div class="result-card">
                     <span>🎓 Reg. No: <b>{reg}</b></span>
