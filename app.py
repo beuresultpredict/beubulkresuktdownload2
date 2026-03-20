@@ -21,7 +21,7 @@ st.markdown("""
 st.title("🟦 BEU Bulk Result Downloader")
 
 # --- Inputs ---
-sample_url = st.text_input("1. Paste Sample Result URL", placeholder="https://beu-bih.ac.in/result-three?...")
+sample_url = st.text_input("1. Paste Sample Result URL", placeholder="https://beu-bih.ac.in/result-three?name=B.Tech.%204th%20Semester%20Examination,%202025&semester=IV&session=2025&regNo=23102125007&exam_held=December%2F2025")
 col1, col2 = st.columns(2)
 with col1:
     start_reg = st.number_input("Start Reg. No", value=23102125001, format="%d")
