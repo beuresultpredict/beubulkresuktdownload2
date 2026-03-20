@@ -175,7 +175,7 @@ st.markdown(f"""
         <p>This Bulk Result Downloader is designed and developed by <b>Krishna Raj</b>,<br>
         a student of <b>Rashtrakavi Ramdhari Singh Dinkar College of Engineering</b>, Batch 2023,<br>
         from the Mechanical Engineering Department.</p>
-        <p>In the future, major updates and improvements will be introduced in this SGPA Calculator to enhance accuracy and user experience.</p>
+        <p>In the future, major updates and improvements will be introduced in this bulk result finder to enhance accuracy and user experience.</p>
         <p>Connect with me on <a href="https://www.linkedin.com/in/krishna-raj-%F0%9F%87%AE%F0%9F%87%B3-528108310" target="_blank">LinkedIn</a>.</p>
     </div>
     """, unsafe_allow_html=True)
