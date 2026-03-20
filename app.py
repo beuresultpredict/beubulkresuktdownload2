@@ -4,170 +4,145 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 # --- Page Config ---
 st.set_page_config(page_title="BEU BULK RESULT FINDER", page_icon="🎓", layout="centered")
 
-# --- Custom CSS (Advanced Blue & Black Professional Theme) ---
+# --- Custom CSS (Modern Professional Theme) ---
 st.markdown("""
     <style>
-    /* Main Background */
-    .stApp { 
-        background-color: #0b0e14; 
-        color: #e6edf3; 
-    }
+    .stApp { background-color: #0b0e14; color: #e6edf3; }
     
-    /* Header Container Styling */
+    /* Header Container */
     .header-box {
-        text-align: center;
-        padding: 30px 10px;
-        background: linear-gradient(180deg, #161b22 0%, #0b0e14 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        padding: 20px;
         border-bottom: 2px solid #007bff;
-        margin-bottom: 40px;
-        border-radius: 0 0 20px 20px;
+        margin-bottom: 30px;
     }
-    .uni-name {
+    .uni-title {
         color: #ffffff;
-        font-size: 32px;
+        font-size: clamp(20px, 5vw, 32px);
         font-weight: 800;
-        margin-bottom: 10px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        margin: 0;
     }
     .sub-title {
         color: #007bff;
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 600;
-        letter-spacing: 2px;
+        text-align: center;
+        margin-top: -20px;
+        margin-bottom: 30px;
         text-transform: uppercase;
+        letter-spacing: 1px;
     }
-    
-    /* Input Fields */
+
+    /* Inputs */
     .stTextInput>div>div>input, .stNumberInput>div>div>input {
         background-color: #161b22 !important;
         color: white !important;
         border: 1px solid #30363d !important;
-        border-radius: 12px !important;
-        padding: 12px !important;
+        border-radius: 10px !important;
     }
-    
-    /* Big Action Button */
+
+    /* Button */
     .stButton>button {
         background: linear-gradient(90deg, #007bff, #00c6ff);
         color: white;
         border: none;
-        border-radius: 12px;
-        font-size: 18px;
+        border-radius: 10px;
         font-weight: bold;
-        padding: 20px;
+        padding: 15px;
         width: 100%;
-        transition: 0.4s;
-        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+        transition: 0.3s;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
     }
     .stButton>button:hover {
-        transform: scale(1.02);
-        box-shadow: 0 6px 25px rgba(0, 123, 255, 0.6);
-        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.5);
     }
 
-    /* Result Card Styling */
+    /* Result Cards */
     .result-card {
         background: #161b22;
         border: 1px solid #30363d;
-        border-left: 6px solid #007bff;
-        padding: 18px;
-        border-radius: 12px;
-        margin-bottom: 15px;
+        border-left: 5px solid #007bff;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        transition: 0.3s;
     }
-    .result-card:hover {
-        border-color: #007bff;
-        background: #1c2128;
-    }
-
-    /* Download Link Button */
     .btn-link {
         background-color: #238636;
         color: white !important;
-        padding: 10px 20px;
-        border-radius: 8px;
+        padding: 8px 15px;
+        border-radius: 6px;
+        text-decoration: none !important;
         font-size: 14px;
         font-weight: bold;
-        text-decoration: none !important;
-        display: inline-block;
     }
-    .btn-link:hover {
-        background-color: #2ea043;
-    }
-    
-    /* Footer Styling */
+
+    /* Footer */
     .footer {
         text-align: center;
-        margin-top: 80px;
-        padding: 40px 20px;
-        background: #0d1117;
+        margin-top: 60px;
+        padding: 30px;
         border-top: 1px solid #30363d;
         color: #8b949e;
         font-size: 14px;
-        line-height: 1.6;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- Logo & Heading ---
-col_l, col_r = st.columns([1, 4])
-with col_l:
-    # Yahan aap apna logo.png upload karke uska naam likh sakte hain
-    # Filhal main placeholder image use kar raha hoon
-    st.image("https://beu-bih.ac.in/images/logo.png", width=100)
+# --- Header Section ---
+# Wikipedia direct image link for BEU Logo
+logo_url = "https://upload.wikimedia.org/wikipedia/en/3/3a/Bihar_Engineering_University_logo.png"
 
-with col_r:
-    st.markdown("""
-        <div style='padding-top: 10px;'>
-            <div style='color: #ffffff; font-size: 28px; font-weight: 800;'>Bihar Engineering University, Patna</div>
-            <div style='color: #007bff; font-size: 18px; font-weight: 600;'>BEU Bulk Result Finder</div>
-        </div>
-    """, unsafe_allow_html=True)
+col1, col2, col3 = st.columns([1, 4, 1])
+with col2:
+    st.image(logo_url, width=120)
+    st.markdown("<h1 style='text-align: center; color: white; margin-top: 10px;'>Bihar Engineering University, Patna</h1>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-title'>BEU Bulk Result Finder</div>", unsafe_allow_html=True)
 
-st.markdown("---")
-
-# --- Form Section ---
-st.markdown("### 📝 Enter Details")
-url_input = st.text_input("🔗 Paste any student's Result URL from BEU Website", 
-                          placeholder="Example: https://beu-bih.ac.in/result-three?name=...")
+# --- Input Section ---
+st.markdown("### 🛠 Setup Range")
+url_input = st.text_input("🔗 Paste Result URL (Must contain 'regNo=')", 
+                          placeholder="https://beu-bih.ac.in/result-three?name=...")
 
 c1, c2 = st.columns(2)
 with c1:
-    start_num = st.number_input("Start Registration No.", value=23102125001, format="%d")
+    start_val = st.number_input("Start Registration No.", value=23102125001, format="%d")
 with c2:
-    end_num = st.number_input("End Registration No.", value=23102125010, format="%d")
+    end_val = st.number_input("End Registration No.", value=23102125010, format="%d")
 
 # --- Execution ---
-if st.button("🚀 GENERATE ALL LINKS"):
+if st.button("🚀 GENERATE BULK LINKS"):
     if not url_input or "regNo=" not in url_input:
-        st.error("⚠️ Please enter a valid URL that contains 'regNo'.")
+        st.error("❌ Please provide a valid BEU result URL with a registration number.")
     else:
         try:
             parsed = urlparse(url_input)
             params = parse_qs(parsed.query)
             
-            st.markdown("### 📋 Result Links Generated")
-            st.info("Click 'Open Result' and press **Ctrl + P** to save as PDF.")
+            st.markdown("---")
+            st.subheader("📋 Results Found")
             
-            for r in range(int(start_num), int(end_num) + 1):
+            for r in range(int(start_val), int(end_val) + 1):
                 params['regNo'] = [str(r)]
-                new_q = urlencode(params, doseq=True)
-                final_url = urlunparse(parsed._replace(query=new_q))
+                new_url = urlunparse(parsed._replace(query=urlencode(params, doseq=True)))
                 
                 st.markdown(f"""
                 <div class="result-card">
-                    <span style="font-size:16px;">🎓 Reg No: <b>{r}</b></span>
-                    <a href="{final_url}" target="_blank" class="btn-link">📄 Open Result</a>
+                    <span>🎓 Registration: <b>{r}</b></span>
+                    <a href="{new_url}" target="_blank" class="btn-link">📄 Open & Print</a>
                 </div>
                 """, unsafe_allow_html=True)
-                
-            st.balloons()
+            
+            st.success("All links generated! Use Ctrl+P to save any result as PDF.")
             
         except Exception as e:
-            st.error(f"Error: {e}")
+            st.error(f"Something went wrong: {e}")
 
 # --- Footer ---
 st.markdown(f"""
@@ -175,7 +150,7 @@ st.markdown(f"""
         <p>This Bulk Result Downloader is designed and developed by <b>Krishna Raj</b>,<br>
         a student of <b>Rashtrakavi Ramdhari Singh Dinkar College of Engineering</b>, Batch 2023,<br>
         from the Mechanical Engineering Department.</p>
-        <p>In the future, major updates and improvements will be introduced in this bulk result finder to enhance accuracy and user experience.</p>
+        <p>In the future, major updates and improvements will be introduced in this SGPA Calculator to enhance accuracy and user experience.</p>
         <p>Connect with me on <a href="https://www.linkedin.com/in/krishna-raj-%F0%9F%87%AE%F0%9F%87%B3-528108310" target="_blank">LinkedIn</a>.</p>
     </div>
     """, unsafe_allow_html=True)
