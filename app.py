@@ -1,27 +1,28 @@
 import streamlit as st
-import requests
-from PyPDF2 import PdfMerger
-import io
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 # --- Page Config ---
 st.set_page_config(page_title="BEU Bulk Result Downloader", page_icon="🎓")
 
-# --- Custom CSS ---
+# --- Custom CSS (Blue & Black Theme) ---
 st.markdown("""
     <style>
     .stApp { background-color: #0e1117; color: white; }
-    .stButton>button { background-color: #007bff; color: white; border-radius: 8px; font-weight: bold; width: 100%; }
-    .footer { text-align: center; margin-top: 50px; color: #8b949e; border-top: 1px solid #30363d; padding-top: 20px; }
-    a { color: #58a6ff !important; text-decoration: none; }
-    .success-box { padding: 20px; border-radius: 10px; border: 1px solid #28a745; background: #1a2e1a; text-align: center; margin-bottom: 20px; }
+    .stButton>button { background-color: #007bff; color: white; border-radius: 8px; font-weight: bold; width: 100%; height: 3.5em; }
+    .stTextInput>div>div>input { background-color: #161b22; color: white; border: 1px solid #007bff; }
+    .footer { text-align: center; margin-top: 50px; color: #8b949e; border-top: 1px solid #30363d; padding-top: 20px; font-size: 14px; }
+    a { color: #58a6ff !important; text-decoration: none; font-weight: bold; }
+    .result-card { border: 1px solid #30363d; padding: 15px; border-radius: 10px; margin-bottom: 12px; background: #161b22; display: flex; justify-content: space-between; align-items: center; }
     </style>
     """, unsafe_allow_html=True)
 
 st.title("🟦 BEU Bulk Result Downloader")
 
 # --- Inputs ---
-sample_url = st.text_input("1. Paste Sample Result URL", placeholder="https://beu-bih.ac.in/result-three?name=B.Tech.%204th%20Semester%20Examination,%202025&semester=IV&session=2025&regNo=23102125007&exam_held=December%2F2025")
+st.info("💡 Paste the result URL of any student from the BEU site below.")
+sample_url = st.text_input("1. Paste Sample Result URL", 
+                           placeholder="https://beu-bih.ac.in/result-three?name=...")
+
 col1, col2 = st.columns(2)
 with col1:
     start_reg = st.number_input("Start Reg. No", value=23102125001, format="%d")
@@ -29,63 +30,36 @@ with col2:
     end_reg = st.number_input("End Reg. No", value=23102125010, format="%d")
 
 # --- Logic ---
-if st.button("Generate & Merge All Results into One PDF"):
-    if not sample_url:
-        st.error("URL missing!")
+if st.button("Generate Bulk Result Links"):
+    if not sample_url or "regNo=" not in sample_url:
+        st.error("Please paste a correct BEU Result URL containing 'regNo'.")
     else:
         try:
+            # URL Parsing
             parsed_url = urlparse(sample_url)
             query_params = parse_qs(parsed_url.query)
-            merger = PdfMerger()
             
-            progress_bar = st.progress(0)
-            status_text = st.empty()
+            st.success(f"Successfully generated links for range {start_reg} to {end_reg}")
             
-            found_count = 0
-            # Note: BEU page to PDF requires high resources, so we will use a trick
-            # We are assuming the result can be fetched as a stream
-            
-            for i, reg in enumerate(range(int(start_reg), int(end_reg) + 1)):
-                query_params['regNo'] = [str(reg)]
-                final_link = urlunparse(parsed_url._replace(query=urlencode(query_params, doseq=True)))
-                
-                status_text.text(f"Processing Result: {reg}...")
-                
-                # Fetching result
-                response = requests.get(final_link, timeout=10)
-                
-                if response.status_code == 200 and "Registration No" in response.text:
-                    # Yahan hum PDF generation ka logic dalenge 
-                    # Note: Direct HTML to PDF complex hai, isliye hum results ki list aur links confirm kar rahe hain
-                    found_count += 1
-                
-                progress_bar.progress((i + 1) / (end_reg - start_reg + 1))
+            st.markdown("### 📋 Result List:")
+            st.write("Click the links below to view/print results. (Use Ctrl+P to save as PDF)")
 
-            if found_count > 0:
+            for reg in range(int(start_reg), int(end_reg) + 1):
+                # Update regNo dynamically
+                query_params['regNo'] = [str(reg)]
+                new_query = urlencode(query_params, doseq=True)
+                final_link = urlunparse(parsed_url._replace(query=new_query))
+                
+                # Show cards for each student
                 st.markdown(f"""
-                <div class="success-box">
-                    <h3>✅ {found_count} Results Found!</h3>
-                    <p>BEU results are dynamic HTML pages. To save them as one PDF:</p>
-                    <ol style="text-align: left; display: inline-block;">
-                        <li>Click 'Open All' to see results.</li>
-                        <li>Press <b>Ctrl + P</b> on your keyboard.</li>
-                        <li>Select <b>'Save as PDF'</b> in Destination.</li>
-                    </ol>
+                <div class="result-card">
+                    <span>🎓 Reg. No: <b>{reg}</b></span>
+                    <a href="{final_link}" target="_blank">📄 View & Download PDF</a>
                 </div>
                 """, unsafe_allow_html=True)
-                
-                # Button to open links in bulk (helpful for browser print)
-                st.info("Direct PDF Merging of BEU HTML pages is restricted by their server security. Use the links below for accurate PDF printing.")
-                
-                for reg in range(int(start_reg), int(end_reg) + 1):
-                    query_params['regNo'] = [str(reg)]
-                    link = urlunparse(parsed_url._replace(query=urlencode(query_params, doseq=True)))
-                    st.write(f"📄 Result {reg}: [Click to Open & Print]({link})")
-            else:
-                st.warning("No results found. Please check your Registration range.")
 
         except Exception as e:
-            st.error(f"Error: {e}")
+            st.error(f"Error generating links: {e}")
 
 # --- Footer ---
 st.markdown("---")
@@ -94,6 +68,7 @@ st.markdown(f"""
         <p>This Bulk Result Downloader is designed and developed by <b>Krishna Raj</b>,<br>
         a student of <b>Rashtrakavi Ramdhari Singh Dinkar College of Engineering</b>, Batch 2023,<br>
         from the Mechanical Engineering Department.</p>
+        <p>In the future, major updates and improvements will be introduced in this SGPA Calculator to enhance accuracy and user experience.</p>
         <p>Connect with me on <a href="https://www.linkedin.com/in/krishna-raj-%F0%9F%87%AE%F0%9F%87%B3-528108310" target="_blank">LinkedIn</a>.</p>
     </div>
     """, unsafe_allow_html=True)
